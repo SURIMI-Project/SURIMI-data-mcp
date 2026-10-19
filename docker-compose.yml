@@ -1,0 +1,35 @@
+services:
+  surimi-db:
+    image: postgres:16-alpine
+    container_name: surimi-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: surimi
+      POSTGRES_USER: surimi
+      POSTGRES_PASSWORD: ${SURIMI_DB_PASSWORD:?set SURIMI_DB_PASSWORD before docker compose up}
+    ports:
+      - "127.0.0.1:26613:5432"
+    volumes:
+      - surimi-pgdata:/var/lib/postgresql/data
+      - ./data/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U surimi -d surimi"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  surimi-mcp:
+    build: .
+    container_name: surimi-mcp
+    restart: unless-stopped
+    ports:
+      - "26610:26610"
+    environment:
+      DB_BACKEND: postgres
+      DATABASE_URL: postgresql://surimi:${SURIMI_DB_PASSWORD:?set SURIMI_DB_PASSWORD before docker compose up}@surimi-db:5432/surimi
+    depends_on:
+      surimi-db:
+        condition: service_healthy
+
+volumes:
+  surimi-pgdata:

@@ -1,0 +1,799 @@
+# The datasets the SURIMI data server serves, one entry per dataset.
+# Loaded by surimi_data_mcp/datasets/catalog.py, which holds the lookups over these entries.
+# Comments record why an entry reads as it does; keep them with the entry they explain.
+
+- id: eu-dcf-economic-aegean
+  name: EU DCF Fisheries Economic Performance, Aegean Sea
+  kind: observed
+  domain: eu_dcf
+  table: hive.eu_dcf.eu_dcf_fisheries_economic_performance_aegean_sea
+  time_column: year
+  columns:
+    - {name: year, type: int}
+    - {name: gear_code, type: string}
+    - {name: country_code, type: string}
+    - {name: gross_revenue_meur, type: float, additivity: flow}
+    - {name: operating_cost_meur, type: float, additivity: flow}
+    - {name: gross_value_added_meur, type: float, additivity: flow}
+    - {name: profit_margin, type: float, additivity: ratio}
+    - {name: employment_fte, type: int, additivity: stock}
+
+- id: eu-dcf-employment-wmed
+  name: EU DCF Fisheries Employment, Western Mediterranean
+  kind: observed
+  domain: eu_dcf
+  table: hive.eu_dcf.eu_dcf_fisheries_employment_western_mediterranean
+  time_column: year
+  columns:
+    - {name: year, type: int}
+    - {name: gear_code, type: string}
+    - {name: country_code, type: string}
+    - {name: employment_fte, type: int, additivity: stock}
+    - {name: gender_balance_ratio, type: float, additivity: ratio}
+
+- id: oecd-fisheries-support-eu
+  scope_note: Covers 6 countries only (ESP, FRA, ITA, GRC, PRT, NLD), not all EU coastal states despite
+    the name. For a country outside that six, national-level subsidies are in 'aer-economic-national-level'
+    under variable_code 'totdirsub'. Absence here is not absence from SURIMI.
+  name: 'OECD Fisheries Support Estimates, EU Coastal States (6 countries only: ESP, FRA, ITA, GRC, PRT,
+    NLD -- not all EU coastal states despite the name; a country outside that six is in ''aer-economic-national-level''
+    under variable_code ''totdirsub'')'
+  kind: observed
+  domain: oecd
+  table: hive.oecd.oecd_fisheries_support_estimates_eu_coastal_states
+  time_column: year
+  columns:
+    - {name: year, type: int}
+    - {name: country_code, type: string}
+    - {name: direct_transfers_meur, type: float, additivity: flow}
+    - {name: cost_reducing_transfers_meur, type: float, additivity: flow}
+    - {name: general_services_meur, type: float, additivity: flow}
+
+- id: surimi-biomass-wmed-empirical
+  not_a_substitute_for: 'This is an observed SURVEY of biomass, 60 rows over 5 species. It is NOT a stock
+    assessment: it carries no reference point, so B/Bmsy, F/Fmsy and Kobe status cannot be derived from
+    it. Those are CMSY++ output and are not served. Summing biomass_kt across species does not make a
+    stock trajectory. cv_uncertainty is this survey''s coefficient of variation, NOT the uncertainty of
+    a stock status.'
+  citation: SURIMI project empirical biomass survey, Western Mediterranean (GSA06/07).
+  name: SURIMI Empirical Biomass Surveys, Western Mediterranean
+  kind: observed
+  domain: surimi
+  table: hive.surimi.surimi_empirical_biomass_surveys_western_mediterranean
+  time_column: year
+  columns:
+    - {name: year, type: int}
+    - {name: species_code, type: string}
+    - {name: biomass_kt, type: float, additivity: stock}
+    - {name: cv_uncertainty, type: float, additivity: ratio}
+
+  # Registered wide, as the source file ships. The loader names the year columns y_1994 to y_2021.
+  # fao_division carries the sub-basin code ('37.3.1' is the Aegean, '37.1.x' the west, '37.3.x' the east),
+  # and fao_subarea ('37.1' or '37.3') separates west from east, so species can be listed per side with GROUP BY scient_name.
+  # The col column is the unnamed first field of the raw header.
+- id: surimi-biomass-medits
+  not_a_substitute_for: 'This is trawl-survey catch-per-unit-effort (species weight per km2 of swept area
+    for one haul), NOT an assessed stock biomass: it carries no reference point, and it must not be presented
+    as ''biomass'' without saying it is a survey CPUE index. The source README states the unit as tonnes
+    per km2; the raw values are actually kg per km2 (checked against CMSY++''s own kg/km2 index for the
+    same GSA06 stocks). Do not requote the README''s unit without this correction. There is no ''small demersal'' or any other functional-group column: a group has to
+    be built by selecting specific alpha3_code / scient_name values (see data_list_functional_groups), and
+    a single outlier species can flip the sign of a naive group average, so check the per-species series
+    before reporting a group trend.'
+  name: SURIMI MEDITS Bottom-Trawl Survey CPUE, Mediterranean (FAO Area 37), by species and year, 1994-2021
+  citation: 'MEDITS Working Group (2017) MEDITS-Handbook. Version n. 9, 2017. MEDITS Project, 106 pp. DOI:
+    https://doi.org/10.25607/OBP-1931'
+  kind: observed
+  domain: surimi
+  table: hive.surimi.medits_survey_cpue_mediterranean
+  time_column: null
+  columns:
+    - {name: col, type: string}
+    - {name: scient_name, type: string}
+    - {name: taxonomic_code, type: string}
+    - {name: alpha3_code, type: string}
+    - {name: common_name, type: string}
+    - {name: gsa_area, type: string, description: 'GFCM Geographical Sub-Area number, e.g. ''15'' for Malta. The finest region key this table carries.'}
+    - {name: fao_area, type: string}
+    - {name: fao_subarea, type: string}
+    - {name: fao_division_description, type: string}
+    - {name: fao_division, type: string}
+    - {name: haul_number, type: string, description: MEDITS haul identifier. The swept-area denominator for this row's CPUE was already applied per haul upstream; it is not a separate column here.}
+    - {name: lon_end, type: float, additivity: ratio}
+    - {name: lat_end, type: float, additivity: ratio}
+    - {name: y_1994, type: float, additivity: ratio}
+    - {name: y_1995, type: float, additivity: ratio}
+    - {name: y_1996, type: float, additivity: ratio}
+    - {name: y_1997, type: float, additivity: ratio}
+    - {name: y_1998, type: float, additivity: ratio}
+    - {name: y_1999, type: float, additivity: ratio}
+    - {name: y_2000, type: float, additivity: ratio}
+    - {name: y_2001, type: float, additivity: ratio}
+    - {name: y_2002, type: float, additivity: ratio}
+    - {name: y_2003, type: float, additivity: ratio}
+    - {name: y_2004, type: float, additivity: ratio}
+    - {name: y_2005, type: float, additivity: ratio}
+    - {name: y_2006, type: float, additivity: ratio}
+    - {name: y_2007, type: float, additivity: ratio}
+    - {name: y_2008, type: float, additivity: ratio}
+    - {name: y_2009, type: float, additivity: ratio}
+    - {name: y_2010, type: float, additivity: ratio}
+    - {name: y_2011, type: float, additivity: ratio}
+    - {name: y_2012, type: float, additivity: ratio}
+    - {name: y_2013, type: float, additivity: ratio}
+    - {name: y_2014, type: float, additivity: ratio}
+    - {name: y_2015, type: float, additivity: ratio}
+    - {name: y_2016, type: float, additivity: ratio}
+    - {name: y_2017, type: float, additivity: ratio}
+    - {name: y_2018, type: float, additivity: ratio}
+    - {name: y_2019, type: float, additivity: ratio}
+    - {name: y_2020, type: float, additivity: ratio}
+    - {name: y_2021, type: float, additivity: ratio}
+
+- id: fishbase-sealifebase-traits
+  not_a_substitute_for: 'This is per-SPECIES trait data (FishBase/SeaLifeBase), not an environmental time
+    series: min_temperature, max_temperature and mean_temperature describe the thermal range a species is
+    typically found in, not what the sea temperature actually was in any place or month. It can support
+    a community temperature index (a trait-weighted mean over an observed community''s species), but only
+    alongside real observation data that supplies the community composition (e.g. MEDITS CPUE); read alone
+    it answers ''where does this species live'', never ''what did the sea do''. SURIMI holds no Mediterranean
+    sea-temperature or primary-productivity time series anywhere; this table is the nearest material, not
+    a substitute for one.'
+  name: FishBase / SeaLifeBase Species Traits (thermal range, trophic level, resilience)
+  citation: 'Froese, R. and Pauly, D. (editors). 2025. FishBase. Available at www.fishbase.org. Palomares,
+    M.L.D. and Pauly, D. (eds). 2025. SeaLifeBase. Available at www.sealifebase.org. Licence: CC-BY-NC.'
+  kind: observed
+  domain: ecological
+  table: hive.ecological.fishbase_sealifebase_traits
+  time_column: null
+  columns:
+    - {name: scient_name, type: string}
+    - {name: alpha3_code, type: string}
+    - {name: taxonomic_code, type: string}
+    - {name: prior_r_value, type: string}
+    - {name: cl_lower, type: string}
+    - {name: cl_upper, type: string}
+    - {name: resilience, type: string}
+    - {name: trophic_level, type: string}
+    - {name: trophic_level_se, type: string}
+    - {name: min_temperature, type: string}
+    - {name: max_temperature, type: string}
+    - {name: mean_temperature, type: string}
+    - {name: habitat, type: string}
+    - {name: broader_habitat, type: string}
+    - {name: source_url, type: string}
+
+- id: surimi-sales-aegean-simulated
+  not_a_substitute_for: 'This is SIMULATED SALES, not catch. quantity_kt is the quantity SOLD: it excludes
+    discards entirely and is a market outcome, not a fishing one. Do NOT answer a question about catches,
+    landings or production from it, and do not treat its 2025-2040 span as a catch projection, because no catch
+    projection has been produced. OBSERVED catch-family data IS served and this warning does not apply to
+    it: fisheries-landings holds landings in tonnes live weight (for example 31,079 Belgian rows, 1904-2022),
+    so use that for what WAS caught. What is missing is a FORWARD projection; modelled catch output stops
+    at a hindcast ending 2017-01 on the model server. The calculation record shows that the number was computed
+    from these rows, and it does not show that these rows answer the question asked. THE NAME DOES NOT MATCH
+    THE ROWS: the market codes are Spanish (ESAQA, ESARN, ESBCN), not Greek or Aegean, and nothing in the
+    lake ties this table to a SURIMI run, so do not present it as an Aegean or Greek result.'
+  name: SURIMI Simulated Sales Output, Aegean Sea
+  kind: modelled
+  domain: surimi
+  table: hive.surimi.surimi_simulated_sales_output_aegean_sea
+  time_column: year
+  columns:
+    - {name: year, type: int}
+    - {name: market_code, type: string}
+    - {name: species_code, type: string}
+    - {name: quantity_kt, type: float, additivity: flow}
+    - {name: price_eur_per_kg, type: float, additivity: ratio}
+    - {name: value_meur, type: float, additivity: flow}
+
+- id: aer-economic-national-level
+  name: EU DCF AER Economic Performance, National Level
+  kind: observed
+  domain: eu_dcf
+  table: hive.eu_dcf.aer_economic_national_level
+  time_column: year
+  not_a_substitute_for: 'Greece''s 2013, 2015 and 2017 rows are reporting gaps, not economic events: 2013
+    energy cost is 160.3 percent of reported landings, and 2017 shows a -49.2 percent gross margin against
+    +26.4 the year before, driven by a landings number far out of line with 2016 and 2018. Exclude those
+    three years before fitting any trend through Greek rows in this table.'
+  columns:
+    - {name: year, type: string}
+    - {name: country_code, type: string}
+    - {name: country_name, type: string}
+    - {name: variable_group, type: string}
+    - {name: variable_name, type: string}
+    - {name: variable_code, type: string}
+    - {name: value, type: string}
+    - {name: unit, type: string}
+
+- id: aer-social-data
+  name: EU DCF AER Social Data (2017–2020)
+  kind: observed
+  domain: eu_dcf
+  table: hive.eu_dcf.aer_social_data_2017_2020
+  time_column: year
+  columns:
+    - {name: year, type: string}
+    - {name: country_code, type: string}
+    - {name: country_name, type: string}
+    - {name: fishing_tech, type: string}
+    - {name: vessel_length, type: string}
+    - {name: gender, type: string}
+    - {name: employment_status, type: string}
+    - {name: variable_code, type: string}
+    - {name: variable_value, type: string}
+
+- id: aer-capacity
+  name: EU DCF AER Fleet Capacity
+  kind: observed
+  domain: eu_dcf
+  table: hive.eu_dcf.aer_capacity
+  time_column: year
+  columns:
+    - {name: year, type: string}
+    - {name: country_code, type: string}
+    - {name: country_name, type: string}
+    - {name: fishing_tech, type: string}
+    - {name: vessel_length, type: string}
+    - {name: number_of_vessels, type: string, additivity: stock}
+    - {name: total_vessel_power, type: string, additivity: stock}
+    - {name: total_vessel_tonnage, type: string, additivity: stock}
+    - {name: mean_age_of_vessels, type: string, additivity: ratio}
+    - {name: mean_loa_of_vessels, type: string, additivity: ratio}
+
+- id: aer-economic-2013-2023
+  name: EU DCF AER Economic Performance (2013–2023)
+  kind: observed
+  domain: eu_dcf
+  table: hive.eu_dcf.aer_economic_2013_2023
+  time_column: year
+  columns:
+    - {name: year, type: string}
+    - {name: country_code, type: string}
+    - {name: country_name, type: string}
+    - {name: fishing_tech, type: string}
+    - {name: vessel_length, type: string}
+    - {name: variable_group, type: string}
+    - {name: variable_name, type: string}
+    - {name: variable_code, type: string}
+    - {name: value, type: string}
+    - {name: unit, type: string}
+    - {name: gear, type: string}
+    - {name: fishery, type: string}
+
+- id: fdi-capacity-by-country
+  name: EU DCF FDI Fleet Capacity by Country
+  kind: observed
+  domain: eu_dcf
+  table: hive.eu_dcf.fdi_capacity_by_country
+  time_column: year
+  # Geography columns: supra_region, sub_region, geo_indicator, geo_indicator_desc, fao_area_description and fishing_tech_desc.
+  # The table holds no distance variable, and trips by sea area is the closest proxy for the distance travelled by boat.
+  # average_length is vessel length overall and not a journey length.
+  columns:
+    - {name: year, type: string}
+    - {name: country, type: string}
+    - {name: vessel_length_category, type: string}
+    - {name: fishing_tech, type: string}
+    - {name: total_vessels, type: string, additivity: stock}
+    - {name: total_kw, type: string, additivity: stock}
+    - {name: total_gt, type: string, additivity: stock}
+    - {name: total_trips, type: string, additivity: flow}
+    - {name: average_age, type: string, additivity: ratio}
+    - {name: maximum_sea_days, type: string, additivity: ratio}
+    - {name: supra_region, type: string}
+    - {name: sub_region, type: string}
+    - {name: geo_indicator, type: string}
+    - {name: geo_indicator_desc, type: string}
+    - {name: fao_area_description, type: string}
+    - {name: fishing_tech_desc, type: string}
+    - {name: average_length, type: string, additivity: ratio, description: Mean vessel length overall (LOA) in metres. Not a distance travelled.}
+
+# In the source export of oecd-fsedata every row carries its 23 year fields before its 10 dimension fields.
+# The loader and the cube put them back in order: see _ROTATED_TABLES in loader/load_csv.py, _ROTATED_CUBE_DATASETS in engine/cube.py,
+# and tests/test_load_csv_row_realignment.py and tests/test_cube_rotation_fix.py.
+- id: oecd-fsedata
+  name: 'OECD -- Fisheries Support Estimates, FSE Category Breakdown for 43 countries including Belgium,
+    Germany, Denmark, Ireland and Sweden, not only the six in oecd-fisheries-support-eu (wide format: one
+    column per year, y_2000..y_2022; one row per country policy with its fse_category_code)'
+  kind: observed
+  domain: oecd
+  table: hive.oecd.fsedata
+  time_column: null
+  columns:
+    - {name: country_code, type: string}
+    - {name: country_name, type: string}
+    - {name: country_policy_code, type: string}
+    - {name: country_policy_name, type: string}
+    - {name: fse_category_code, type: string}
+    - {name: fse_category_name, type: string}
+    - {name: country_policy_description, type: string}
+    - {name: support_mechanism, type: string}
+    - {name: unit_of_measure_code, type: string}
+    - {name: unit_of_measure_name, type: string}
+    - {name: y_2000, type: string}
+    - {name: y_2001, type: string}
+    - {name: y_2002, type: string}
+    - {name: y_2003, type: string}
+    - {name: y_2004, type: string}
+    - {name: y_2005, type: string}
+    - {name: y_2006, type: string}
+    - {name: y_2007, type: string}
+    - {name: y_2008, type: string}
+    - {name: y_2009, type: string}
+    - {name: y_2010, type: string}
+    - {name: y_2011, type: string}
+    - {name: y_2012, type: string}
+    - {name: y_2013, type: string}
+    - {name: y_2014, type: string}
+    - {name: y_2015, type: string}
+    - {name: y_2016, type: string}
+    - {name: y_2017, type: string}
+    - {name: y_2018, type: string}
+    - {name: y_2019, type: string}
+    - {name: y_2020, type: string}
+    - {name: y_2021, type: string}
+    - {name: y_2022, type: string}
+
+- id: eu-dcf-fuel
+  name: EU DCF Fuel Costs and Efficiency
+  kind: observed
+  domain: eu_dcf
+  table: hive.eu_dcf.fuel
+  time_column: year
+  not_a_substitute_for: 'Greece rows are unusable here: sum_revenue is zero for 2008-2012, which makes the
+    energy-cost-to-revenue share read 168.5 percent in 2013 and 85.2 percent in 2015, which is confident nonsense
+    and not a real cost share. Use the implied_fuel_price / energy_cost_share metrics over v-fuel-price-by-country-year
+    (aer-economic-national-level) for Greek fuel cost numbers instead.'
+  columns:
+    - {name: year, type: string}
+    - {name: country_code, type: string}
+    - {name: country_name, type: string}
+    - {name: fishing_tech, type: string}
+    - {name: sum_revenue, type: string, additivity: flow}
+    - {name: sum_ecost, type: string, additivity: flow}
+    - {name: fuel_efficiency, type: string, additivity: ratio}
+
+  # Replaces eu-dcf-rev-grp. That table came from AUTH's Rev_GRP.csv, which has one row per AER variable (a long file) and was registered as a wide one.
+  # SUM(revenue) over it returned total income and not the gross value of landings.
+  # This entry is built from the AER source AUTH used, with one row per fleet segment and year and every measure named.
+  # scripts/build_fleet_economics.py reconciles it against AUTH's published indicator and fails the build on any mismatch.
+- id: eu-dcf-fleet-economics
+  name: EU DCF Fleet economics (income, costs, profit)
+  kind: observed
+  domain: eu_dcf
+  table: hive.eu_dcf.fleet_economics
+  time_column: year
+  warning: 4,733 of the 12,022 fleet segment-years report NO economic variable at all. Those carry NULL,
+    not 0, so they stay out of SUM and out of any ranking. A fleet showing no profit value has not reported
+    one; it has not broken even.
+  not_a_substitute_for: '''revenue'' is ambiguous in this domain and this table does not guess. landings_value
+    is the gross value of landings, the value a fisher calls revenue. total_income adds other income, quota
+    leasing income and operating subsidies. Naming which one an answer used is the difference between 14.46
+    bn and 14.90 bn EUR for Italy over 2008-2024. Likewise gross_profit follows STECF and includes subsidies,
+    while gross_profit_excl_subsidies_and_rights narrows income to landings plus other income, which is
+    the basis AUTH''s published Rev_GRP indicator uses.'
+  # Income components (AER: Income group): landings_value, other_income, rights_income,
+  # operating_subsidies.
+  # Cost components (AER: Expenditure group): energy_cost, repair_cost, other_variable_cost,
+  # other_nonvariable_cost, rights_cost, personnel_cost, unpaid_labour_value, depreciation.
+  # Derived, per STECF's 2024 Annual Economic Report: total_income, gva, gross_profit,
+  # gross_profit_excl_subsidies_and_rights, net_profit.
+  columns:
+    - {name: country_name, type: string}
+    - {name: country_code, type: string}
+    - {name: year, type: bigint}
+    - {name: supra_reg, type: string}
+    - {name: fishing_tech, type: string}
+    - {name: vessel_length, type: string}
+    - {name: geo_indicator, type: string}
+    - {name: landings_value, type: double, additivity: flow}
+    - {name: other_income, type: double, additivity: flow}
+    - {name: rights_income, type: double, additivity: flow}
+    - {name: operating_subsidies, type: double, additivity: flow}
+    - {name: energy_cost, type: double, additivity: flow}
+    - {name: repair_cost, type: double, additivity: flow}
+    - {name: other_variable_cost, type: double, additivity: flow}
+    - {name: other_nonvariable_cost, type: double, additivity: flow}
+    - {name: rights_cost, type: double, additivity: flow}
+    - {name: personnel_cost, type: double, additivity: flow}
+    - {name: unpaid_labour_value, type: double, additivity: flow}
+    - {name: depreciation, type: double, additivity: flow}
+    - {name: total_income, type: double, additivity: flow}
+    - {name: gva, type: double, additivity: flow}
+    - {name: gross_profit, type: double, additivity: flow}
+    - {name: gross_profit_excl_subsidies_and_rights, type: double, additivity: flow}
+    - {name: net_profit, type: double, additivity: flow}
+
+  # This table is cube-only. The file is 1.9 GB, so loader/load_csv.py does not load it into Postgres (tests/test_catalog_additions.py checks this).
+  # Its measure columns carry the confidentiality placeholder C instead of a number (see warning below).
+- id: eu-dcf-catches
+  # The file's README gives the meaning of the placeholder: "confidential data are not shown, the placeholder C is used instead".
+  warning: 'CONFIDENTIAL DATA IS WITHHELD, SO EVERY TOTAL HERE IS A LOWER BOUND. Member States suppress
+    values at country level and the file writes the placeholder C where the value belongs. C is NOT a zero
+    and it is loaded as NULL, so SUM silently skips those rows. Measured over 400,000 rows: the confidential
+    column reads A (all withheld) on 142,404 rows, 35.6 per cent, V (value withheld) on 6,321, and N (nothing
+    withheld) on 251,275. So a national landings total omits more than a third of the rows that matched.
+    aggregate returns a per-measure suppressed count on every result: state the total AND that count, and
+    never present the number as complete. Separately, tot_discards_tonnes is NA on about half the rows,
+    meaning not applicable rather than withheld, and the README warns discard estimates are uncertain and
+    possibly biased.'
+  name: EU DCF FDI Catches by Country, Quarter, Gear and Species (2013-2024; confidentiality-suppressed
+    rows carry "C" in total_live_weight_landed, total_value_of_landings and tot_discards_tonnes)
+  kind: observed
+  domain: eu_dcf
+  table: hive.eu_dcf.eu_dcf_catches
+  time_column: year
+  not_a_substitute_for: 'Measure columns (total_live_weight_landed, total_value_of_landings, tot_discards_tonnes)
+    carry the literal string "C" wherever a row is confidentiality-suppressed (see the ''confidential''
+    column): 330,212 of 501,244 Spanish DTS rows carry it, and every tonnage here is a floor over the visible
+    rows, never a complete national count. Use aggregate for totals here: it treats the "C" rows as NULL
+    and reports how many were suppressed. In query_data write the cast as CAST(NULLIF(col, ''C'') AS double
+    precision), which both the database and the cube accept. This table holds observed catch only, 2013-2024;
+    it carries no climate-linked projection and no forward scenario.'
+  columns:
+    - {name: country, type: string}
+    - {name: year, type: int}
+    - {name: quarter, type: string}
+    - {name: vessel_length, type: string}
+    - {name: fishing_tech, type: string}
+    - {name: gear_type, type: string}
+    - {name: target_assemblage, type: string}
+    - {name: mesh_size_range, type: string}
+    - {name: metier, type: string}
+    - {name: metier_7, type: string}
+    - {name: domain_discards, type: string}
+    - {name: domain_landings, type: string}
+    - {name: supra_region, type: string}
+    - {name: sub_region, type: string}
+    - {name: eez_indicator, type: string}
+    - {name: geo_indicator, type: string}
+    - {name: nep_sub_region, type: string}
+    - {name: specon_tech, type: string}
+    - {name: deep, type: string}
+    - {name: spe_code, type: string}
+    - {name: total_live_weight_landed, type: string, additivity: flow}
+    - {name: total_value_of_landings, type: string, additivity: flow}
+    - {name: tot_discards_tonnes, type: string, additivity: flow}
+    - {name: confidential, type: string}
+    - {name: fishing_tech_desc, type: string}
+    - {name: gear_type_desc, type: string}
+    - {name: geo_indicator_desc, type: string}
+    - {name: fao_area_description, type: string}
+    - {name: scientific_name, type: string}
+    - {name: english_name, type: string}
+
+  # Companion to eu-dcf-catches, with the same confidentiality placeholder: the same quarterly breakdown for days at sea instead of landings value.
+- id: eu-dcf-effort
+  name: EU DCF Effort by Country, quarterly (2013-2024)
+  kind: observed
+  domain: eu_dcf
+  table: hive.eu_dcf.eu_dcf_effort_by_country
+  time_column: year
+  not_a_substitute_for: total_days_at_sea and the other measure columns carry the literal string "C" wherever
+    a row is confidentiality-suppressed (see the 'confidential' column). Use aggregate for totals here, which
+    treats the "C" rows as NULL and reports how many were suppressed, the same convention as eu-dcf-catches.
+  columns:
+    - {name: country, type: string}
+    - {name: year, type: int}
+    - {name: quarter, type: string}
+    - {name: fishing_tech, type: string}
+    - {name: supra_region, type: string}
+    - {name: total_days_at_sea, type: float, additivity: flow}
+
+- id: v-employment-by-gender
+  name: Employment by gender (persons employed / socemploy headcount, NOT FTE)
+  kind: observed
+  domain: semantic
+  table: v_employment_by_gender
+  time_column: null
+  columns:
+    - {name: gender, type: string}
+    - {name: employment_persons, type: float, additivity: stock}
+
+- id: v-employment-by-gender-year
+  name: Employment by gender and year (persons employed / socemploy headcount)
+  kind: observed
+  domain: semantic
+  table: v_employment_by_gender_year
+  time_column: year
+  columns:
+    - {name: year, type: int}
+    - {name: gender, type: string}
+    - {name: employment_persons, type: float, additivity: stock}
+
+- id: v-employment-by-nationality
+  name: Employment by nationality (persons employed / socemploy headcount)
+  kind: observed
+  domain: semantic
+  table: v_employment_by_nationality
+  time_column: null
+  columns:
+    - {name: nationality, type: string}
+    - {name: employment_persons, type: float, additivity: stock}
+
+- id: v-fte-by-gender
+  name: Full-time-equivalents by gender (socfte, FTE not headcount)
+  kind: observed
+  domain: semantic
+  table: v_fte_by_gender
+  time_column: null
+  columns:
+    - {name: gender, type: string}
+    - {name: fte, type: float, additivity: stock}
+
+- id: v-sales-by-species-year
+  name: Simulated Aegean sales value (MEUR) by species and year
+  kind: modelled
+  domain: semantic
+  table: v_sales_by_species_year
+  time_column: year
+  columns:
+    - {name: year, type: int}
+    - {name: species_code, type: string}
+    - {name: value_meur, type: float, additivity: flow}
+
+- id: v-fuel-price-by-country-year
+  name: Energy cost, consumption and landings income by country and year (pivoted from AER national-level
+    EAV)
+  kind: observed
+  domain: semantic
+  table: v_fuel_price_by_country_year
+  time_column: year
+  not_a_substitute_for: Greece's 2013, 2015 and 2017 rows carry a reporting gap in totlandginc (energy_cost_share
+    reads 160.3 percent in 2013), inherited from aer-economic-national-level. Exclude those three years
+    for Greece before fitting a trend through energy_cost_share or implied_fuel_price.
+  columns:
+    - {name: year, type: int}
+    - {name: country_code, type: string}
+    - {name: country_name, type: string}
+    - {name: totenercost, type: float, additivity: flow}
+    - {name: totenercons, type: float, additivity: flow}
+    - {name: totlandginc, type: float, additivity: flow}
+    - {name: implied_fuel_price, type: float, additivity: ratio}
+    - {name: energy_cost_share, type: float, additivity: ratio}
+
+- id: v-subsidies-by-country-year
+  scope_note: 'Covers 6 Mediterranean countries only (ESP, FRA, ITA, GRC, PRT, NLD). It is NOT the full
+    subsidy picture: national-level subsidies for 22 EU countries, including Belgium, are in dataset ''aer-economic-national-level''
+    under variable_code ''totdirsub'' (operating subsidies), and the OECD support broken down by policy
+    category for 43 countries, Belgium included, is in dataset ''oecd-fsedata''. Check both before concluding
+    a country has no subsidy data.'
+  name: Fisheries support subsidies (MEUR) by country and year, with total
+  kind: observed
+  domain: semantic
+  table: v_subsidies_by_country_year
+  time_column: year
+  columns:
+    - {name: year, type: int}
+    - {name: country_code, type: string}
+    - {name: direct_transfers_meur, type: float, additivity: flow}
+    - {name: cost_reducing_transfers_meur, type: float, additivity: flow}
+    - {name: general_services_meur, type: float, additivity: flow}
+    - {name: total_support_meur, type: float, additivity: flow}
+
+  # fisheries-landings and fisheries-landings-divisions both cover the full 1903-2022 ICES history.
+  # They differ in granularity (area against division), not in period.
+  # list_datasets shows name, scope_note, notes and citation, so the overlap warning is in name.
+  # Annual sums in area 37 (1.19 to 1.43 million) match published FAO Mediterranean and Black Sea capture in tonnes,
+  # and annual sums in area 27 (8.2 to 9.2 million) match ICES Northeast Atlantic landings in tonnes live weight.
+- id: fisheries-landings
+  name: Fisheries Landings in tonnes live weight, FAO Area 37 and ICES Area 27 (area level; overlaps the
+    divisions table, take totals from one table only)
+  kind: observed
+  domain: fisheries
+  table: hive.fisheries.fisheries_landings
+  time_column: year
+  columns:
+    - {name: year, type: int}
+    - {name: country, type: string}
+    - {name: country_harmonized, type: string}
+    - {name: fao_area, type: string}
+    - {name: fao_area_description, type: string}
+    - {name: fao_subarea, type: string}
+    - {name: fao_subarea_description, type: string}
+    - {name: fao_division, type: string}
+    - {name: fao_division_description, type: string}
+    - {name: fao_subdivision, type: string}
+    - {name: fao_unit, type: string}
+    - {name: alpha3_code, type: string}
+    - {name: original_area, type: string}
+    - {name: taxonomic_code, type: string}
+    - {name: scient_name, type: string}
+    - {name: common_name, type: string}
+    - {name: source, type: string}
+    - {name: source_file, type: string}
+    - {name: landings, type: float, additivity: flow}
+
+- id: fisheries-landings-divisions
+  name: Fisheries Landings by Division in tonnes live weight, ICES Area 27 (division level; overlaps the
+    area-level table, take totals from one table only)
+  kind: observed
+  domain: fisheries
+  table: hive.fisheries.fisheries_landings_divisions
+  time_column: year
+  columns:
+    - {name: year, type: int}
+    - {name: country, type: string}
+    - {name: country_harmonized, type: string}
+    - {name: fao_area, type: string}
+    - {name: fao_area_description, type: string}
+    - {name: fao_subarea, type: string}
+    - {name: fao_subarea_description, type: string}
+    - {name: fao_division, type: string}
+    - {name: fao_division_description, type: string}
+    - {name: fao_subdivision, type: string}
+    - {name: fao_unit, type: string}
+    - {name: alpha3_code, type: string}
+    - {name: original_area, type: string}
+    - {name: taxonomic_code, type: string}
+    - {name: scient_name, type: string}
+    - {name: common_name, type: string}
+    - {name: source, type: string}
+    - {name: source_file, type: string}
+    - {name: landings, type: float, additivity: flow}
+
+  # The most recent assessment per stock: 21,077 rows over 538 stocks, one row per stock-year.
+- id: ices-stock-assessment-latest
+  name: ICES Stock Database - latest assessment per stock, full time series, all Northeast Atlantic stocks
+  # list_datasets shows scope_note and does not show not_a_substitute_for, so scope_note names the questions this table answers.
+  scope_note: 'Answers Northeast Atlantic stock-status questions: whether a stock is overfished or depleted
+    (stock_size below blim), in the red zone (stock_size below blim, or fishing_pressure above flim), fished
+    above fmsy, and how SSB and F changed over the years. A catch compatible with MSY can be approximated
+    as fmsy x stock_size; call it an approximation. Not for the Mediterranean: Western Mediterranean stock
+    status is on the MODEL server, model_run_stock_status.'
+  citation: ICES Stock Database, https://stockdatabase.ices.dk/default.aspx, all stocks and all available
+    years, downloaded and merged by the SURIMI data team; see the source README.
+  kind: observed
+  domain: ices
+  table: hive.ices.stock_assessment_latest
+  time_column: year
+  not_a_substitute_for: 'Stock-level assessment output for FAO Area 27 (Northeast Atlantic), NOT a Mediterranean
+    stock: SURIMI''s own case study is GSA06 and is assessed by CMSY++, which this table does not contain.
+    Three traps. (1) The measure columns carry the literal string NA where no value exists; the loader nulls
+    it, so a NULL means ''not assessed'', never zero. Spawning biomass is in stock_size where stock_size_description
+    is ''SSB''; yield_ssb is NA on 97 per cent of rows and must not be used for SSB. (2) purpose distinguishes
+    ''Advice'' (the official assessment) from ''Unofficial'' and other rows. These two filters move the
+    headline answer a lot, so state which you used: taking the latest year per stock where both stock_size
+    and blim exist, stocks below blim are 32 of 193 with no filter, 25 of 154 restricting to stock_size_description=''SSB'',
+    31 of 190 restricting to purpose=''Advice'', and 24 of 151 with both (measured 2026-09-21). The denominator
+    is stocks that HAVE a blim, not all 538 stocks in the file. (3) This is the LATEST assessment per stock
+    but every stock still has a full per-year series, so ''current'' status is the max year per fish_stock.
+    Depletion is stock_size below blim. The low_ and high_ columns (stock_size, fishing_pressure, tbiomass,
+    recruitment) are the published confidence intervals on the estimates in this table; quote them only as
+    bounds on the estimate for that stock.'
+  columns:
+    - {name: assessment_key, type: string}
+    - {name: fish_stock, type: string}
+    - {name: stock_database_id, type: string}
+    - {name: stock_key, type: string}
+    - {name: purpose, type: string, description: '''Advice'' rows are the official assessment; ''Unofficial'' and other values are not. Filter to Advice unless the question asks otherwise.'}
+    - {name: stock_description, type: string}
+    - {name: ices_areas, type: string}
+    - {name: scient_name, type: string}
+    - {name: alpha3_code, type: string}
+    - {name: taxonomic_code, type: string}
+    - {name: sg_name, type: string}
+    - {name: report, type: string}
+    - {name: unit_of_recruitment, type: string}
+    - {name: recruitment_description, type: string}
+    - {name: total_biomass_units, type: string}
+    - {name: stock_size_description, type: string, description: 'What stock_size measures for this stock, usually ''SSB''. yield_ssb is the literal string NA on 97 per cent of rows: spawning biomass lives HERE and in stock_size, never in yield_ssb.'}
+    - {name: stock_size_units, type: string}
+    - {name: catches_landings_units, type: string}
+    - {name: fishing_pressure_description, type: string}
+    - {name: fishing_pressure_units, type: string}
+    - {name: recruitment_age, type: string}
+    - {name: recruitment_length, type: string}
+    - {name: type_stock, type: string}
+    - {name: assessment_year, type: integer}
+    - {name: year, type: integer, description: 'Assessment data year. The ''latest'' table is one time SERIES per stock, so ''current status'' means the max year per fish_stock, not the whole table.'}
+    - {name: low_recruitment, type: number}
+    - {name: recruitment, type: number, additivity: stock}
+    - {name: high_recruitment, type: number}
+    - {name: low_tbiomass, type: number}
+    - {name: tbiomass, type: number, additivity: stock}
+    - {name: high_tbiomass, type: number}
+    - {name: low_stock_size, type: number, description: Lower bound of the published confidence interval on stock_size.}
+    - {name: stock_size, type: number, description: 'The stock-size measure named by stock_size_description, in stock_size_units. For SSB stocks, compare against blim, bpa and msy_b_trigger.', additivity: stock}
+    - {name: high_stock_size, type: number, description: Upper bound of the published confidence interval on stock_size.}
+    - {name: landings, type: number, additivity: stock}
+    - {name: catches, type: number, additivity: stock}
+    - {name: discards, type: number, additivity: stock}
+    - {name: ibc, type: number, additivity: stock}
+    - {name: unallocated_removals, type: number, additivity: stock}
+    - {name: yield_ssb, type: number, additivity: stock}
+    - {name: low_fishing_pressure, type: number}
+    - {name: fishing_pressure, type: number, description: Fishing pressure (usually F) in fishing_pressure_units; compare against fmsy., additivity: stock}
+    - {name: high_fishing_pressure, type: number}
+    - {name: f_landings, type: number, additivity: stock}
+    - {name: f_discards, type: number, additivity: stock}
+    - {name: f_ibc, type: number, additivity: stock}
+    - {name: f_unallocated, type: number, additivity: stock}
+    - {name: flim, type: number}
+    - {name: fpa, type: number}
+    - {name: blim, type: number, description: Limit biomass reference point. stock_size below blim is the ICES signal of a depleted stock.}
+    - {name: bpa, type: number}
+    - {name: fmsy, type: number, description: Fishing mortality reference point consistent with MSY.}
+    - {name: msy_b_trigger, type: number, description: MSY biomass trigger reference point.}
+
+  # Every assessment year per stock, 86,038 rows. Use it to see how an assessment was revised over time, and use ices-stock-assessment-latest for current status.
+- id: ices-stock-assessment-timeseries
+  name: ICES Stock Database - every assessment year per stock, all Northeast Atlantic stocks
+  citation: ICES Stock Database, https://stockdatabase.ices.dk/default.aspx, all stocks and all available
+    years, downloaded and merged by the SURIMI data team; see the source README.
+  kind: observed
+  domain: ices
+  table: hive.ices.stock_assessment_timeseries
+  time_column: year
+  not_a_substitute_for: 'Stock-level assessment output for FAO Area 27 (Northeast Atlantic), NOT a Mediterranean
+    stock: SURIMI''s own case study is GSA06 and is assessed by CMSY++, which this table does not contain.
+    Three traps. (1) The measure columns carry the literal string NA where no value exists; the loader nulls
+    it, so a NULL means ''not assessed'', never zero. Spawning biomass is in stock_size where stock_size_description
+    is ''SSB''; yield_ssb is NA on 97 per cent of rows and must not be used for SSB. (2) purpose distinguishes
+    ''Advice'' (the official assessment) from ''Unofficial'' and other rows. These two filters move the
+    headline answer a lot, so state which you used: taking the latest year per stock where both stock_size
+    and blim exist, stocks below blim are 32 of 193 with no filter, 25 of 154 restricting to stock_size_description=''SSB'',
+    31 of 190 restricting to purpose=''Advice'', and 24 of 151 with both (measured 2026-09-21 on
+    ices-stock-assessment-latest; for current status use that table). (3) This table carries EVERY
+    assessment_year per stock (86,038 rows over 538 stocks), so one stock-year appears once per assessment
+    that covered it: filter to one assessment_year first, and use it to see how an assessment was revised.
+    Depletion is stock_size below blim. The low_ and high_ columns (stock_size, fishing_pressure, tbiomass,
+    recruitment) are the published confidence intervals on the estimates in this table; quote them only as
+    bounds on the estimate for that stock.'
+  columns:
+    - {name: assessment_key, type: string}
+    - {name: fish_stock, type: string}
+    - {name: stock_database_id, type: string}
+    - {name: stock_key, type: string}
+    - {name: purpose, type: string, description: '''Advice'' rows are the official assessment; ''Unofficial'' and other values are not. Filter to Advice unless the question asks otherwise.'}
+    - {name: stock_description, type: string}
+    - {name: ices_areas, type: string}
+    - {name: scient_name, type: string}
+    - {name: alpha3_code, type: string}
+    - {name: taxonomic_code, type: string}
+    - {name: sg_name, type: string}
+    - {name: report, type: string}
+    - {name: unit_of_recruitment, type: string}
+    - {name: recruitment_description, type: string}
+    - {name: total_biomass_units, type: string}
+    - {name: stock_size_description, type: string, description: 'What stock_size measures for this stock, usually ''SSB''. yield_ssb is the literal string NA on 97 per cent of rows: spawning biomass lives HERE and in stock_size, never in yield_ssb.'}
+    - {name: stock_size_units, type: string}
+    - {name: catches_landings_units, type: string}
+    - {name: fishing_pressure_description, type: string}
+    - {name: fishing_pressure_units, type: string}
+    - {name: recruitment_age, type: string}
+    - {name: recruitment_length, type: string}
+    - {name: type_stock, type: string}
+    - {name: assessment_year, type: integer}
+    - {name: year, type: integer, description: 'Assessment data year. Each stock has one series per assessment_year here, so filter to one assessment_year before reading a series.'}
+    - {name: low_recruitment, type: number}
+    - {name: recruitment, type: number, additivity: stock}
+    - {name: high_recruitment, type: number}
+    - {name: low_tbiomass, type: number}
+    - {name: tbiomass, type: number, additivity: stock}
+    - {name: high_tbiomass, type: number}
+    - {name: low_stock_size, type: number, description: Lower bound of the published confidence interval on stock_size.}
+    - {name: stock_size, type: number, description: 'The stock-size measure named by stock_size_description, in stock_size_units. For SSB stocks, compare against blim, bpa and msy_b_trigger.', additivity: stock}
+    - {name: high_stock_size, type: number, description: Upper bound of the published confidence interval on stock_size.}
+    - {name: landings, type: number, additivity: stock}
+    - {name: catches, type: number, additivity: stock}
+    - {name: discards, type: number, additivity: stock}
+    - {name: ibc, type: number, additivity: stock}
+    - {name: unallocated_removals, type: number, additivity: stock}
+    - {name: yield_ssb, type: number, additivity: stock}
+    - {name: low_fishing_pressure, type: number}
+    - {name: fishing_pressure, type: number, description: Fishing pressure (usually F) in fishing_pressure_units; compare against fmsy., additivity: stock}
+    - {name: high_fishing_pressure, type: number}
+    - {name: f_landings, type: number, additivity: stock}
+    - {name: f_discards, type: number, additivity: stock}
+    - {name: f_ibc, type: number, additivity: stock}
+    - {name: f_unallocated, type: number, additivity: stock}
+    - {name: flim, type: number}
+    - {name: fpa, type: number}
+    - {name: blim, type: number, description: Limit biomass reference point. stock_size below blim is the ICES signal of a depleted stock.}
+    - {name: bpa, type: number}
+    - {name: fmsy, type: number, description: Fishing mortality reference point consistent with MSY.}
+    - {name: msy_b_trigger, type: number, description: MSY biomass trigger reference point.}
+

@@ -1,0 +1,112 @@
+EwE_Group_No,EwE_Group_Name,Taxon_No,Common_Name,Genus,Species,FAO_Code,Lifestage_Code,Is_fished
+2,"Phytoplankton",,,,,,,
+3,"Benthic macrophytes",,,,,,,
+4,"Seagrass",,,,,,,
+5,"Microphytobenthos",,,,,,,
+6,"Micro and mesozooplankton",,,,,,,
+7,"Macrozooplankton",,,,,,,
+8,"Gelatinous plankton",,,,,,,
+9,"Annelids",,,,,,,
+10,"Suprabenthos",,,,,,,
+10,"Spottail mantis shrimp",1,"Squilla mantis","Squilla","mantis",MTS,,yes
+11,"Norway lobster",2,"Nephrops norvegicus","Nephrops","norvegicus",NEP,,yes
+12,"Red shrimp",3,"Aristeus antennatus","Aristeus","antennatus",ARA,,yes
+13,"Other shrimps",4,"Pasiphaea multidentata","Pasiphaea","multidentata",FAM,,yes
+13,"Other shrimps",5,"Plesionika heterocarpus","Plesionika","heterocarpus",LKO,,yes
+13,"Other shrimps",6,"Plesionika martia","Plesionika","martia",LKT,,yes
+13,"Other shrimps",7,"Solenocera membranacea","Solenocera","membranacea",SKM,,yes
+14,"Crabs",8,"Geryon longipes","Geryon","longipes",GRQ,,yes
+14,"Crabs",9,"Liocarcinus depurator","Liocarcinus","depurator",LQZ,,yes
+14,"Crabs",10,"Paromola cuvieri","Paromola","cuvieri",OLV,,yes
+15,"Bivalves-gastropods",11,"Bolinus brandaris","Bolinus","brandaris",BOY,,yes
+17,"Benthic invertebrates",,,,,,,yes
+17,"Benthic cephalopods (continental shelf)",12,"Eledone cirrhosa","Eledone","cirrhosa",EOI,,yes
+17,"Benthic cephalopods (continental shelf)",13,"Octopus vulgaris","Octopus","vulgaris",OCC,,yes
+18,"Benthopelagic cephalopods (continental shelf)",14,"Alloteuthis subulata","Alloteuthis","subulata",OUL,,yes
+18,"Benthopelagic cephalopods (continental shelf)",15,"Alloteuthis media","Alloteuthis","media",OUM,,yes
+18,"Benthopelagic cephalopods (continental shelf)",16,"Illex coindetii","Illex","coindetii",SQM,,yes
+19,"Benthic cephalopods (upper slope)",17,"Octopus salutii","Octopus","salutii",OQT,,yes
+19,"Benthic cephalopods (upper slope)",18,"Sepiolidae","","Sepiolidae",,,yes
+20,"Benthopelagic cephalopods (upper slope)",19,"Histioteuthis bonellii","Histioteuthis","bonellii",HQB,,yes
+20,"Benthopelagic cephalopods (upper slope)",20,"Todarodes sagittatus","Todarodes s","agittatus",SQE,,yes
+22,"Salema",,,,,,,yes
+22,"Juvenil mullets",90,"Mullus barbatus","Mullus","barbatus",MUT,juvenile,yes
+23,"Adult mullets",90,"Mullus barbatus","Mullus","barbatus",MUT,adult,yes
+24,"Blue whiting",21,"Micromesistius poutassou","Micromesistius","poutassou",WHB,,yes
+25,"Anglerfish",22,"Lophius budegassa","Lophius","budegassa",ANK,,yes
+25,"Anglerfish",23,"Lophius piscatorius","Lophius","piscatorius",MON,,yes
+26,"Juvenil hake",91,"Merluccius merluccius","Merluccius","merluccius",HKE,juvenile,yes
+27,"Adult hake",91,"Merluccius merluccius","Merluccius","merluccius",HKE,adult,yes
+28,"Poor cod",24,"Trisopterus minutus","Trisopterus","minutus",POD,,yes
+28,"Poor cod",89,"","Trisopterus","luscus",BIB,,yes
+29,"European conger",25,"Conger conger","Conger","conger",COE,,yes
+30,"Flatfishes",26,"Citharus linguatula","Citharus","linguatula",CIL,,yes
+30,"Flatfishes",27,"Lepidorhombus boscii","Lepidorhombus","boscii",LDB,,yes
+30,"Flatfishes",28,"Scophthalmus rhombus","Scophthalmus","rhombus",BLL,,yes
+30,"Flatfishes",29,"Solea sp.","Solea","sp.",SOO,,yes
+31,"Small demersal fishesl (continental shelf)",30,"Diplodus sp.","Diplodus","sp.",SRG,,yes
+31,"Small demersal fishesl (continental shelf)",31,"Lepidotrigla cavillone","Lepidotrigla","cavillone",LDV,,yes
+31,"Small demersal fishesl (continental shelf)",32,"Serranus hepatus","Serranus","hepatus",SRJ,,yes
+32,"Large demersal fishes (continental shelf)",33,"Pagellus acarne","Pagellus","acarne",SBA,,yes
+32,"Large demersal fishes (continental shelf)",34,"Pagellus erythrinus","Pagellus","erythrinus",PAC,,yes
+33,"Demersal fishes (upper slope)",35,"Helicolenus dactylopterus","Helicolenus","dactylopterus",BRF,,yes
+33,"Demersal fishes (upper slope)",36,"Lepidopus caudatus","Lepidopus","caudatus",SFS,,yes
+33,"Demersal fishes (upper slope)",37,"Trachyrhinchus scabrus","Trachyrhinchus","scabrus",TSU,,yes
+34,"Bentopelagic fishes",38,"Glossanodon leioglossus","Glossanodon","leioglossus",GLI,,yes
+34,"Bentopelagic fishes",39,"Spicara flexuosa","Spicara","flexuosa",LXQ,,yes
+34,"Bentopelagic fishes",40,"Spicara smaris","Spicara","smaris",SPC,,yes
+35,"Mesopelagic fishes",41,"Boops boops","Boops","boops",BOG,,yes
+36,"Demersal sharks (continental shelf)",42,"Scyliorhinus canicula","Scyliorhinus","canicula",SYC,,yes
+37,"Demersal sharks (upper slope)",43,"Dalatias licha","Dalatias","licha",SCK,,yes
+37,"Demersal sharks (upper slope)",44,"Galeus melastomus","Galeus","melastomus",SHO,,yes
+38,"Rays and skates",45,"Dasyatis pastinaca","Dasyatis","pastinaca",JDP,,yes
+38,"Rays and skates",46,"Raja clavata","Raja","clavata",RJC,,yes
+38,"Rays and skates",47,"Raja asterias","Raja","asterias",JRS,,yes
+39,"Juvenile anchovy",92,"Engraulis encrasicholoides","Engraulis","encrasicholoides",ANE,juvenile,yes
+40,"Adult anchovy",92,"Engraulis encrasicholoides","Engraulis","encrasicholoides",ANE,adult,yes
+41,"Juvenile sardine",93,"Sardina pilchardus","Sardina","pilchardus",PIL,juvenile,yes
+42,"Adult sardine",93,"Sardina pilchardus","Sardina","pilchardus",PIL,adult,yes
+43,"Round sardinella",48,"Sardinella aurita","Sardinella","aurita",SAA,,yes
+44,"European sprat",49,"Spratus spratus","Spratus","spratus",SPR,,yes
+45,"Horse mackerel",50,"Trachurus mediterraneus","Trachurus","mediterraneus",HMM,,yes
+45,"Horse mackerel",51,"Trachurus picturatus","Trachurus","picturatus",JAA,,yes
+45,"Horse mackerel",52,"Trachurus trachurus","Trachurus","trachurus",HOM,,yes
+46,"Atlantic mackerel",53,"Scomber scombrus","Scomber","scombrus",MAC,,yes
+47,"Atlantic chub mackerel",83,"Atlantic chub mackerel","Scomber","colias",,,yes
+48,"Swordfish",84,"Swordfish","Xiphias","gladius",,,yes
+49,"Atlantic bluefin tuna",54,"Thunnus thynnus","Thunnus","thynnus",BFT,,yes
+50,"Other large pelagic fishes",55,"Sarda sarda","Sarda","sarda",BON,,yes
+50,"Other large pelagic fishes",56,"Thunnus alalunga","Thunnus","alalunga",ALB,,yes
+51,"Non-commercial large pelagic fishes",85,"Cetorhinus maximus","Cetorhinus","maximus",BSK,,yes
+51,"Non-commercial large pelagic fishes",86,"Mobula mobular","Mobula","Mobular",RMM,,yes
+51,"Non-commercial large pelagic fishes",87,"Mola mola","Mola","Mola",MOX,,yes
+52,"Blue shark",88,"Prionace glauca","Prionace","glauca",BSH,,yes
+53,"Sea turtles",57,"Caretta caretta","Caretta","caretta",TTL,,yes
+54,"Seabirds",58,"Calonectris diomedea","Calonectris","diomedea",CDI,,yes
+54,"Seabirds",59,"Fratercula arctica","Fratercula","arctica",FPA,,yes
+54,"Seabirds",60,"Hydrobates pelagicus","Hydrobates","pelagicus",DAZ,,yes
+54,"Seabirds",61,"Larus audouinii","Larus","audouinii",LVH,,yes
+54,"Seabirds",62,"Larus canus","Larus","canus",LCW,,yes
+54,"Seabirds",63,"Larus fuscus","Larus","fuscus",LOW,,yes
+54,"Seabirds",64,"Larus genei","Larus","genei",DTR,,yes
+54,"Seabirds",65,"Larus melanocephalus","Larus","melanocephalus",DTY,,yes
+54,"Seabirds",66,"Larus michaelis","Larus","michaelis",DKH,,yes
+54,"Seabirds",67,"Larus ridibundus","Larus","ridibundus",CVV,,yes
+54,"Seabirds",68,"Morus bassanus","Morus","bassanus",MVB,,yes
+54,"Seabirds",69,"Phalacrocorax aristotelis","Phalacrocorax","aristotelis",,,yes
+54,"Seabirds",70,"Phalacrocorax carbo","Phalacrocorax","carbo",ISY,,yes
+54,"Seabirds",71,"Puffinus mauretanicus","Puffinus","mauretanicus",UIM,,yes
+54,"Seabirds",72,"Puffinus yelkouan","Puffinus","yelkouan",UYE,,yes
+54,"Seabirds",73,"Sterna albifrons","Sterna","albifrons",FBP,,yes
+54,"Seabirds",74,"Sterna hirundo","Sterna","hirundo",TVA,,yes
+54,"Seabirds",75,"Sterna nilotica","Sterna","nilotica",SVZ,,yes
+54,"Seabirds",76,"Sterna sandvicensis","Sterna","sandvicensis",SVZ,,yes
+55,"Dolphins",77,"Globicephala melas","Globicephala","melas",PIW,,yes
+55,"Dolphins",78,"Grampus griseus","Grampus","griseus",DRR,,yes
+55,"Dolphins",79,"Physeter macrocephalus","Physeter","macrocephalus",SPW,,yes
+55,"Dolphins",80,"Stenella coeruleoalba","Stenella","coeruleoalba",DST,,yes
+55,"Dolphins",81,"Tursiops truncatus","Tursiops","truncatus",DBO,,yes
+56,"Baleen whales",82,"Balaenoptera physalus","Balaenoptera","physalus",FIW,,
+53,"Detritus",,,,,,,
+54,"Discards",,,,,,,
+1,"By-catch",,,,,,,

@@ -1,0 +1,37 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+.coverage
+.mypy_cache/
+
+# The data CSVs are not in this repository. They are on EDITO MinIO, and the server downloads them when it is deployed.
+data/exports/
+data.tar.gz
+
+# Editor + OS
+.vscode/
+.idea/
+.DS_Store
+
+# Cache folder of a retrieval module that is no longer in this repository.
+rag_cache/
+
+# Local env files
+.env
+.env.*
+
+# Evaluation material lives in the private project repository, not here: the benchmark,
+# the evaluation notes, the expert evaluation pages and the scripts that reproduce them.
+benchmark/
+audit-repro/EVALUATION.md
+audit-repro/evaluation/
+audit-repro/Q-*.py
+audit-repro/README.md
+audit-repro/evidence/
+audit-repro/run_*
+audit-repro/extract_*
+static/experts/

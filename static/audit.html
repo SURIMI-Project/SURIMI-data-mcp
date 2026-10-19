@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How this number was calculated</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; background: #f4f6f8; color: #1c2733; }
+  header { background: #0b3d5c; color: #fff; padding: 14px 24px; }
+  header h1 { margin: 0; font-size: 18px; font-weight: 600; }
+  header p { margin: 4px 0 0; font-size: 13px; opacity: .85; }
+  main { max-width: 860px; margin: 24px auto; padding: 0 16px; }
+  .card { background: #fff; border: 1px solid #dde3e9; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; }
+  .card h2 { margin: 0 0 10px; font-size: 15px; text-transform: uppercase; letter-spacing: .04em; color: #51606e; }
+  pre { background: #f0f3f6; border: 1px solid #e0e6ec; border-radius: 6px; padding: 10px; overflow-x: auto; font-size: 12.5px; white-space: pre-wrap; word-break: break-word; }
+  button { background: #0b3d5c; color: #fff; border: 0; border-radius: 6px; padding: 8px 14px; font-size: 13px; cursor: pointer; }
+  button:hover { background: #14507a; }
+  button:disabled { background: #8da4b5; cursor: wait; }
+  textarea { width: 100%; min-height: 140px; box-sizing: border-box; font-family: monospace; font-size: 12px; border: 1px solid #c8d2db; border-radius: 6px; padding: 8px; }
+  .ok { color: #1a7f37; font-weight: 600; }
+  .bad { color: #c62828; font-weight: 600; }
+  .warn { color: #b26a00; font-weight: 600; }
+  .muted { color: #66747f; font-size: 13px; }
+  .verdict { font-size: 15px; margin: 8px 0; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  table { border-collapse: collapse; font-size: 13px; margin: 8px 0; }
+  th, td { border: 1px solid #dde3e9; padding: 4px 8px; text-align: left; }
+  th { background: #f0f3f6; font-weight: 600; }
+  .lead { font-size: 15px; }
+  .banner { border-color: #c62828; color: #c62828; font-weight: 600; }
+  footer { max-width: 860px; margin: 0 auto 24px; padding: 0 16px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>How this number was calculated</h1>
+  <p>Where the server calculated a number in a SURIMI answer, this page shows the query that produced it. Read it, copy it, or re-run it here.</p>
+</header>
+<main id="out"></main>
+<footer id="integrity"></footer>
+<script>
+"use strict";
+const out = document.getElementById("out");
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;   // textContent only: receipts come from the URL
+  return e;
+}
+function card(title) {
+  const c = el("div", "card");
+  c.appendChild(el("h2", null, title));
+  out.appendChild(c);
+  return c;
+}
+function pre(parent, text) {
+  const p = el("pre", null, text);
+  parent.appendChild(p);
+  return p;
+}
+
+function claimSentence(r) {
+  const p = r.input_params || {};
+  const parts = [];
+  const ms = (p.measures || []).map(m => (m.fn || "?") + "(" + (m.col || "?") + ")");
+  if (ms.length) parts.push("Computed " + ms.join(", "));
+  if (p.dataset) parts.push("on dataset “" + p.dataset + "”");
+  if (p.sql) parts.push("via SQL query");
+  if (p.dimensions && p.dimensions.length) parts.push("grouped by " + p.dimensions.join(", "));
+  if (p.filters && p.filters.length)
+    parts.push("filtered by " + p.filters.map(f => (f.col || "?") + " " + (f.op || "=") + " " + JSON.stringify(f.value !== undefined ? f.value : f.values)).join(" AND "));
+  if (p.limit) parts.push("limited to " + p.limit + " rows");
+  return (parts.length ? parts.join(" ") : "Tool “" + (r.tool_id || "unknown") + "” execution") + ".";
+}
+
+function table(parent, rows) {
+  // Rows of objects become a table (textContent only); anything else stays as JSON.
+  if (!Array.isArray(rows) || !rows.length || rows[0] === null || typeof rows[0] !== "object") {
+    pre(parent, JSON.stringify(rows, null, 2));
+    return;
+  }
+  const shown = rows.slice(0, 50);
+  const cols = [];
+  shown.forEach(r => Object.keys(r).forEach(k => { if (!cols.includes(k)) cols.push(k); }));
+  const t = el("table");
+  const head = el("tr");
+  cols.forEach(c => head.appendChild(el("th", null, c)));
+  t.appendChild(head);
+  shown.forEach(r => {
+    const tr = el("tr");
+    cols.forEach(c => tr.appendChild(el("td", null, r[c] === null || r[c] === undefined ? "" : String(r[c]))));
+    t.appendChild(tr);
+  });
+  parent.appendChild(t);
+  if (rows.length > shown.length) parent.appendChild(el("p", "muted", "and " + (rows.length - shown.length) + " more rows"));
+}
+
+// verifySrc carries the RAW SIGNED BYTES (not a JS reserialize of the parsed
+// object): { receipt_b64 } | { receipt_sig } | { receipt_text }. A float SUM
+// like 1320.0 loses its ".0" if we JSON.stringify the parsed object, breaking
+// the signature on a VALID receipt -- so we send the original bytes and let the
+// server (Python json is float-stable) re-canonicalize exactly them. The parsed
+// object r is for DISPLAY only.
+function renderReceipt(r, verifySrc) {
+  out.replaceChildren();
+  const hc = (r.provenance && r.provenance.human_check) || null;
+  const ex = (hc && hc.explanation) || null;
+  const p = r.input_params || {};
+
+  // 1. What was calculated: the sentence the server wrote from the query it ran, then the result.
+  const what = card("What was calculated");
+  what.appendChild(el("p", "lead", ex && ex.summary ? ex.summary : claimSentence(r)));
+  if (!ex) what.appendChild(el("p", "muted", "This record was made before the server explained its numbers in words; the query below is what was run."));
+  const rows = (r.output_value && r.output_value.rows !== undefined) ? r.output_value.rows : r.output_value;
+  table(what, rows);
+
+  // 2. About this table: what the dataset catalogue says about each table the query read. The record
+  // carries only the dataset ids; the notes come from the server's catalogue.
+  const why = card("About this table");
+  const ids = (ex && Array.isArray(ex.datasets)) ? ex.datasets.filter(d => typeof d === "string") : [];
+  if (!ids.length) why.appendChild(el("p", "muted", "The dataset catalogue has no entry for this table."));
+  const sqlText = String((hc && hc.sql) || "");
+  ids.forEach(id => {
+    fetch("/audit/dataset/" + encodeURIComponent(id)).then(x => x.ok ? x.json() : null).then(d => {
+      if (!d) { why.appendChild(el("p", "muted", "No catalogue notes for " + id + ".")); return; }
+      why.appendChild(el("p", null, (d.name || d.id) + (d.kind ? " (" + d.kind + " data)" : "")));
+      if (d.note) why.appendChild(el("p", "muted", d.note));
+      if (d.citation) why.appendChild(el("p", "muted", "Citation: " + d.citation));
+      (d.columns || []).filter(c => sqlText.includes(c.name))
+        .forEach(c => why.appendChild(el("p", "muted", c.name + ": " + c.description)));
+    }).catch(() => why.appendChild(el("p", "muted", "Could not load the catalogue notes.")));
+  });
+
+  // 3. The query, as run, with values filled in.
+  const q = card("The query");
+  const sql = (hc && hc.sql) || p.sql;
+  if (sql) {
+    pre(q, sql);
+    const copy = el("button", null, "Copy SQL");
+    copy.addEventListener("click", () =>
+      navigator.clipboard.writeText(sql).then(
+        () => { copy.textContent = "Copied"; },
+        () => { copy.textContent = "Copy failed"; }));
+    q.appendChild(copy);
+    if (hc && hc.engine) q.appendChild(el("p", "muted", "Run on: " + hc.engine));
+  } else {
+    q.appendChild(el("p", "muted", "This number has no query to show (older format)."));
+  }
+
+  // 4. Source file.
+  const srcCard = card("Source");
+  const src = hc && hc.source;
+  let upgradeLink = null;                         // the source becomes a link only once the record checks out
+  if (src && typeof src === "object") {
+    const line = el("p", "muted");
+    if (src.url && /^https?:\/\//i.test(src.url)) {
+      // Scheme allowlist: a forged receipt must not get a javascript: link.
+      // The URL is signed verbatim, so set it verbatim (no encodeURI).
+      const label = el("span", null, src.file || src.url);
+      line.appendChild(label);
+      upgradeLink = () => {
+        const a = el("a", null, src.file || src.url);
+        a.href = src.url; a.target = "_blank"; a.rel = "noopener";
+        line.replaceChild(a, label);
+      };
+    } else if (src.url) {
+      line.appendChild(document.createTextNode((src.file ? src.file + ": " : "") + src.url));
+    } else {
+      line.appendChild(document.createTextNode(src.file || "(file)"));
+    }
+    if (src.agency) line.appendChild(document.createTextNode(" · " + src.agency));
+    if (src.n_rows !== undefined) line.appendChild(document.createTextNode(" · " + src.n_rows + " rows"));
+    if (src.sha256) line.appendChild(document.createTextNode(" · sha256 " + src.sha256));
+    srcCard.appendChild(line);
+  } else {
+    srcCard.appendChild(el("p", "muted", src === "cube" ? "The SURIMI data cube built from the project's source files."
+                                                         : "Source file unavailable for this number."));
+  }
+
+  // 5. Re-run it on the server, now.
+  const repro = card("Re-run it");
+  const btn = el("button", null, "Recompute now on the server");
+  const verdict = el("div", "verdict");
+  const detail = el("div");                       // replaced on every click, never appended to
+  repro.appendChild(btn); repro.appendChild(verdict); repro.appendChild(detail);
+  btn.addEventListener("click", () => {
+    btn.disabled = true; verdict.textContent = "Recomputing…"; verdict.className = "verdict muted";
+    detail.replaceChildren();
+    postVerify(verifySrc, true).then(res => {
+      btn.disabled = false;
+      if (!res.verified) {
+        if (res.reason === "secret_not_configured") {
+          verdict.textContent = "Server cannot verify signatures right now (no secret configured), so recompute is unavailable.";
+          verdict.className = "verdict muted";
+        } else {
+          verdict.textContent = "This record was changed after the server produced it, so the server will not re-run it.";
+          verdict.className = "verdict bad";
+        }
+        return;
+      }
+      if (!res.recompute_supported) {
+        verdict.textContent = "This kind of result has no re-run path, so the values were not re-derived.";
+        verdict.className = "verdict muted"; return;
+      }
+      if (res.match === true) { verdict.textContent = "MATCH. The server just recomputed the same values."; verdict.className = "verdict ok"; return; }
+      const failed = res.recomputed === null ||
+        (res.mismatches && res.mismatches[0] && res.mismatches[0].error !== undefined);
+      if (failed) {
+        verdict.textContent = "RECOMPUTE FAILED. The server could not re-run the query. This is NOT evidence the number is wrong.";
+        verdict.className = "verdict warn";
+        return;
+      }
+      verdict.textContent = "MISMATCH. The values differ: either the claim was wrong or the data changed since " + (r.timestamp || "issue time") + ".";
+      verdict.className = "verdict bad";
+      detail.replaceChildren(el("pre", null, JSON.stringify(res.mismatches || res, null, 2)));
+    }).catch(() => { btn.disabled = false; verdict.textContent = "Verification request failed."; verdict.className = "verdict bad"; });
+  });
+
+  // The signature is a machine check: one quiet line, loud only when it fails.
+  const integ = document.getElementById("integrity");
+  const sigLine = el("p", "muted", "Checking that this record is unchanged…");
+  integ.replaceChildren(sigLine);
+  postVerify(verifySrc, false).then(res => {
+    if (res.verified) {
+      sigLine.textContent = "Unchanged since the server produced it (" + (r.timestamp || "issue time") + ")."; sigLine.className = "muted";
+      if (upgradeLink) upgradeLink();
+    }
+    else if (res.reason === "secret_not_configured") {
+      sigLine.textContent = "Server cannot verify signatures right now (no secret configured). This says nothing about the record itself.";
+      sigLine.className = "muted";
+    }
+    else {
+      sigLine.textContent = "This record was changed after the server produced it, or was not produced by this server. Do not trust these numbers."; sigLine.className = "bad";
+      // A forged record must not read as authoritative: say so above everything it claims.
+      out.prepend(el("div", "card banner", "This record was changed after the server produced it, or was not produced by this server. Do not trust what this page shows for it."));
+    }
+  }).catch(() => { sigLine.textContent = "Could not reach the verification endpoint."; sigLine.className = "bad"; });
+}
+
+function postVerify(verifySrc, recompute) {
+  // verifySrc is the raw-bytes source ({receipt_b64}|{receipt_sig}|
+  // {receipt_text}); we never JSON.stringify the parsed receipt object here, so
+  // a float SUM's ".0" can't be dropped and break a valid signature.
+  return fetch("/audit/verify", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...verifySrc, recompute: recompute })
+  }).then(r => r.json());
+}
+
+function showPasteFlow(message) {
+  out.replaceChildren();
+  const c = card("Paste a record");
+  if (message) c.appendChild(el("p", "muted", message));
+  const ta = el("textarea");
+  ta.placeholder = "Paste the record (JSON) here…";
+  const btn = el("button", null, "Show this record");
+  const err = el("p", "bad");
+  btn.addEventListener("click", () => {
+    const raw = ta.value;
+    // Parse for DISPLAY; send the RAW pasted text for verification so the
+    // server signs exactly the bytes the user pasted (float-stable).
+    try { renderReceipt(JSON.parse(raw), { receipt_text: raw }); }
+    catch (e) { err.textContent = "That is not valid JSON. Paste the full calculation record, the whole object."; }
+  });
+  c.appendChild(ta); c.appendChild(el("div")); c.appendChild(btn); c.appendChild(err);
+}
+
+function b64urlDecode(frag) {
+  const padded = frag + "=".repeat((4 - frag.length % 4) % 4);
+  const bin = atob(padded.replace(/-/g, "+").replace(/_/g, "/"));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder("utf-8").decode(bytes);
+}
+
+function boot() {
+  const frag = location.hash.replace(/^#/, "");
+  if (!frag) { showPasteFlow("Open an audit link from the assistant, or paste a calculation record below."); return; }
+  if (frag.startsWith("sig:")) {        // b64url alphabet can never contain ':'
+    const sig = frag.slice(4);
+    fetch("/audit/receipt/" + encodeURIComponent(sig))
+      .then(r => { if (!r.ok) throw new Error("miss"); return r.json(); })
+      // Parse the fetched bytes for DISPLAY, but verify by SIG: the server
+      // re-reads the same stored bytes, so we don't depend on a JS reserialize.
+      .then(receipt => renderReceipt(receipt, { receipt_sig: sig }))
+      .catch(() => showPasteFlow(
+        "This short link has expired (server restart or cache eviction). Paste the record (JSON) instead."));
+    return;
+  }
+  // b64 fragment: parse the decoded JSON for DISPLAY, but verify with the RAW
+  // fragment string so the server decodes the exact signed bytes (float-stable).
+  try { renderReceipt(JSON.parse(b64urlDecode(frag)), { receipt_b64: frag }); }
+  catch (e) { showPasteFlow("Could not decode the record in this link. Paste the record (JSON) instead."); }
+}
+boot();
+window.addEventListener("hashchange", boot);
+</script>
+</body>
+</html>
